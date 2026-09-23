@@ -4,7 +4,8 @@
 import { rolling, zscore } from './series.js';
 
 export const FAMILIES = ['MOMENTUM', 'MEAN REVERT', 'VOL BREAKOUT', 'RANGE GRID'];
-export const FEE = 0.0004; // per fill, taker-like
+export let FEE = 0.0004; // per fill, taker-like
+export function setFee(f) { FEE = f; } // tools/walkforward.mjs uses this to test other fee levels
 
 // Entry signal decided on the close of bar j, executed at the open of bar j + 1.
 export function signal(g, s, j) {
