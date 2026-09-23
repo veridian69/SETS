@@ -129,6 +129,27 @@ Read this before getting excited:
 - Picking the leader from configs that passed the gate reuses the out-of-sample data, so its numbers are optimistic.
 - High win rates come from wide stops that were never hit in this window. That is exactly the risk a grid carries.
 
+### Walk-forward over a full year
+
+`tools/walkforward.mjs` is the only evaluation here that means anything. Each fold evolves on 1 800 hours (train 70%, gate 30%) and then trades the leader on the next 600 hours that evolution never saw. It also scores random genomes that merely pass the same gate, with no evolution at all. On a year of BTCUSDT (2025-09-23 → 2026-09-23, 54% peak-to-trough drawdown), 11 folds, 5 seeds each:
+
+| Fee per fill | Evolved leader | Buy & hold | Random genomes that pass the gate |
+| --- | --- | --- | --- |
+| 0.04% (this app's default) | +32% compounded, t ≈ 1.5 | −12% | not run |
+| 0.10% (retail Binance) | −6.5% | −12.4% | −4.0% |
+
+- The apparent edge at 0.04% is a fee assumption, not an edge. One constant flips the sign.
+- Random search that passes the gate does as well as 50 generations of evolution. The gate does what little work there is.
+- The simulator is optimistic: fills at the limit on a touch, stops fill at the stop level through gaps, no slippage, whole equity in one grid.
+
+Reproduce it (the long tape is not committed, so the app is unaffected):
+
+```bash
+python tools/fetch_data.py --hours 8760 --out data/btc-1y.js
+node tools/walkforward.mjs --data data/btc-1y.js               # 0.1% fee
+node tools/walkforward.mjs --data data/btc-1y.js --fee 0.0004  # the app's fee
+```
+
 SETS MACHINE is a transparent research toy for watching evolutionary search work. It is **not** a trading bot to connect to real money.
 
 ## Under the hood
@@ -147,8 +168,9 @@ dist/
   ui/draw.js          Canvas painters: logo, ring, fitness, gene pool, Kelly, chart
   data/candles.js     2 399 hourly BTCUSDT candles from Binance
   assets/             Fonts, logo, favicon
-tools/fetch_data.py   Refreshes dist/data/candles.js from Binance's public API
-tests/                Node test runner: data, indicators, bot mechanics, GA
+tools/fetch_data.py   Refreshes dist/data/candles.js from Binance's public API (--out for a separate tape)
+tools/walkforward.mjs Rolling walk-forward: evolved leader vs buy & hold vs random gate-passers
+tests/                Node test runner: data, indicators, bot mechanics, GA, walk-forward
 docs/                 README images, GIFs and the promo video
 ```
 

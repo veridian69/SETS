@@ -2,7 +2,7 @@
 
 ## Automated tests
 
-`node --test tests/*.test.mjs` passes all 8 tests (Node 24):
+`node --test tests/*.test.mjs` passes all 10 tests (Node 24):
 
 - **Bundled data:** 2 399 candles, all exactly one hour apart, every row satisfies low ≤ open/close ≤ high.
 - **Indicators:** rolling mean and breakout high are causal. A spike at bar 30 is invisible at bar 29, and the breakout high excludes the current bar.
@@ -12,6 +12,8 @@
 - **Genome bounds:** 500 heavy mutations never leave a gene's range; integer genes stay integers.
 - **Determinism:** two runs with the same seed produce identical histories. All four species survive 12 generations, and best fitness never decreases.
 - **Reproducibility:** re-running the leader's backtest gives exactly the stored out-of-sample metrics.
+- **Walk-forward folds:** each fold's test window starts on the bar after its fit window and is exactly `test` bars long, so the leader is never scored on data the search saw.
+- **Walk-forward determinism:** two runs with the same options give identical results, a different fee gives different results, and the module's fee is restored afterwards.
 
 ## Browser checks
 
