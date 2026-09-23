@@ -26,6 +26,11 @@ const tstat = (a) => {
 };
 
 export function walkForward(candles, { fit = 1800, test = 600, step = 600, seeds = 5, gens = 50, fee = 0.001, randomTries = 3000, randomKeep = 25 } = {}) {
+  for (const [k, v] of Object.entries({ fit, test, step })) {
+    if (!Number.isInteger(v) || v <= 0) throw new RangeError(`${k} must be a positive integer, got ${v}`);
+  }
+  // Summaries compound and t-test folds as independent observations, so test windows must not overlap.
+  if (step < test) throw new RangeError(`step (${step}) must be >= test (${test}) so test windows do not overlap`);
   const prevFee = FEE;
   setFee(fee);
   try { return run(candles, { fit, test, step, seeds, gens, fee, randomTries, randomKeep }); } finally { setFee(prevFee); }

@@ -15,6 +15,12 @@ test('walk-forward folds tile the tape and never overlap their own fit window', 
   });
 });
 
+test('walk-forward rejects bad windows instead of hanging or double-counting', () => {
+  for (const step of [0, -300, 1.5, NaN]) assert.throws(() => walkForward(CANDLES, { ...small, step }), RangeError);
+  assert.throws(() => walkForward(CANDLES, { ...small, fit: 0 }), RangeError);
+  assert.throws(() => walkForward(CANDLES, { ...small, step: 100 }), /overlap/); // step < test
+});
+
 test('walk-forward is deterministic, fee-sensitive, and restores the fee', () => {
   const before = FEE;
   const a = walkForward(CANDLES, { ...small, fee: 0.002 });
